@@ -15,10 +15,19 @@ Wählen Sie eine ML-Library Ihrer Wahl (z.B. MediaPipe, TensorFlow.js, hand-pose
 * OpenCV.js
 
 ## Decision Outcome
-Im Kern wurde sich abschließend für MediaPipe entschieden, weil hier sowohl Einstieg und Setup am simpelsten waren als auch (gerade für Hände) passende Rohdaten angezeigt werden. Pro Hand werden 21 Punkte erkannt und als Rohdaten live angezeigt. OpenCV bietet keine fertigen Körper/Hand-Landmarks an wie MediaPipe es tut. TensorFlow.js bietet eine gute Alternative zu MediaPipe. Anhand des Setups und Einstiegs wurde sich hier allerdings für MediaPipe entschieden.
+Im Kern wurde sich abschließend für MediaPipe entschieden, weil hier sowohl Einstieg und Setup am simpelsten waren als auch (gerade für Hände) passende Rohdaten angezeigt werden. Pro Hand werden 21 Punkte erkannt und als Rohdaten live angezeigt. OpenCV bietet keine fertigen Körper/Hand-Landmarks an wie MediaPipe es tut. TensorFlow.js bietet eine gute Alternative zu MediaPipe. Anhand des Setups und Einstiegs wurde sich hier allerdings für MediaPipe entschieden. Für die Umsetzung wurde zusätzlich Vite als Buildtool verwendet.
 
 ### Positive Consequences <!-- optional -->
 * Zusätzlich zu den JSON Rohdaten gut sichtbare Punkte auf dem Kamerabild
+
+**Datenqualität:**
+* Sobald man weiter weg ist oder Hände (größtenteils) verdeckt werden etwas schwierig
+* Hände verdeckt funktioniert relativ gut sogar noch (trotz Ärmeln)
+* Schnelle Bewegungen werden leicht verzögert dargestellt (besonders bei den Landmarks gut zu sehen)
+* Daten insgesamt ziemlich genau, sehr viele Nachkommastellen 
+* Wenn Hände ruhig bleiben trotzdem sehr viele Änderungen in den Zahlen
+* Erkennt ob man eine oder zwei Hände benutzt und welche Hand man nutzt (rechts oder links)
+
 
 ## Pros and Cons of the Options <!-- optional -->
 

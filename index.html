@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beiboot Projekt WebTech</title>
+  </head>
+  <body>
+    <h1>Körperdaten Live Demo</h1>
+    <h2>Beiboot Projekt von Mia Henrichsmeyer</h2>
+
+    <button id="startButton">Kamera starten</button>
+
+    <div class="body-data">
+      <div class="camera-wrapper">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="overlay"></canvas>
+      </div>
+
+      <div class="raw-data-wrapper">
+        <h2>Rohdaten</h2>
+        <pre id="rawData">Noch keine Daten</pre>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

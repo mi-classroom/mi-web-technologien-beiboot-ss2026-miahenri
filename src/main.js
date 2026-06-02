@@ -28,7 +28,7 @@ let currentGestureCandidate = null;
 let gestureFrameCount = 0;
 let stableGesture = null;
 
-const requiredGestureFrames = 20;
+const requiredGestureFrames = 15;
 
 async function initHandLandmarker() {
   rawData.textContent = "MediaPipe wird geladen...";
@@ -146,7 +146,7 @@ function detectPinch(handLandmarks) {
   const indexFingerTip = handLandmarks[8];
 
   const distance = getDistanceInPixels(thumbTip, indexFingerTip);
-  const threshold = 40;
+  const threshold = 30;
 
   if (distance < threshold) {
     return {
@@ -159,11 +159,39 @@ function detectPinch(handLandmarks) {
   return null;
 }
 
+function detectFist(handLandmarks) {
+  const wrist = handLandmarks[0];
+  const thumbTip = handLandmarks[4];
+  const fingerTips = [4, 8, 12, 16, 20].map((idx) => handLandmarks[idx]);
+
+  const distances = fingerTips.map((tip) => getDistanceInPixels(wrist, tip));
+  const distanceThumb = getDistanceInPixels(handLandmarks[6], thumbTip);
+  const averageDistance =
+    distances.reduce((sum, d) => sum + d, 0) / distances.length;
+
+  const threshold = 80;
+
+  if (averageDistance < threshold && distanceThumb < threshold) {
+    return {
+      name: "Fist",
+      isActive: true,
+      details: `Durchschnittlicher Abstand Handgelenk–Fingerkuppen: ${Math.round(averageDistance)}px`,
+    };
+  }
+
+  return null;  
+}
+
 function detectGesture(handLandmarks) {
   const pinch = detectPinch(handLandmarks);
+  const fist = detectFist(handLandmarks);
 
   if (pinch) {
     return pinch;
+  }
+
+  if (fist) {
+    return fist;
   }
 
   return null;

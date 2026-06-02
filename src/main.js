@@ -2,6 +2,7 @@ import "./style.css";
 
 import {
   HandLandmarker,
+  PoseLandmarker,
   FilesetResolver,
 } from "@mediapipe/tasks-vision";
 
@@ -11,17 +12,34 @@ const rawData = document.querySelector("#rawData");
 const canvas = document.querySelector("#overlay");
 const ctx = canvas.getContext("2d");
 const gestureOutput = document.querySelector("#gestureOutput");
+const modeOutput = document.querySelector("#modeOutput");
 
 let handLandmarker;
+let poseLandmarker;
 let lastVideoTime = -1;
 
 const connections = [
-  [0, 1], [1, 2], [2, 3], [3, 4],       // Daumen
-  [0, 5], [5, 6], [6, 7], [7, 8],       // Zeigefinger
-  [5, 9], [9, 10], [10, 11], [11, 12],  // Mittelfinger
-  [9, 13], [13, 14], [14, 15], [15, 16],// Ringfinger
-  [13, 17], [17, 18], [18, 19], [19, 20], // Kleiner Finger
-  [0, 17] // Handkante
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [3, 4], // Daumen
+  [0, 5],
+  [5, 6],
+  [6, 7],
+  [7, 8], // Zeigefinger
+  [5, 9],
+  [9, 10],
+  [10, 11],
+  [11, 12], // Mittelfinger
+  [9, 13],
+  [13, 14],
+  [14, 15],
+  [15, 16], // Ringfinger
+  [13, 17],
+  [17, 18],
+  [18, 19],
+  [19, 20], // Kleiner Finger
+  [0, 17], // Handkante
 ];
 
 let currentGestureCandidate = null;
@@ -29,12 +47,25 @@ let gestureFrameCount = 0;
 let stableGesture = null;
 
 const requiredGestureFrames = 15;
+const closePalmThreshold = 70;
 
-async function initHandLandmarker() {
+async function initPoseLandmarker(vision) {
+  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+      delegate: "GPU",
+    },
+    runningMode: "VIDEO",
+    numPoses: 1,
+  });
+}
+
+async function initMediaPipe() {
   rawData.textContent = "MediaPipe wird geladen...";
 
   const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
   );
 
   handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -46,6 +77,8 @@ async function initHandLandmarker() {
     runningMode: "VIDEO",
     numHands: 2,
   });
+
+  await initPoseLandmarker(vision);
 
   rawData.textContent = "MediaPipe ist bereit. Kamera kann gestartet werden.";
 }
@@ -105,20 +138,73 @@ function drawResults(results) {
   }
 }
 
+function drawPoseResults(results) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!results.landmarks || results.landmarks.length === 0) {
+    return;
+  }
+
+  const pose = results.landmarks[0];
+
+  ctx.fillStyle = "rgba(255, 180, 80, 0.95)";
+
+  for (const point of pose) {
+    const x = point.x * canvas.width;
+    const y = point.y * canvas.height;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
 function predictWebcam() {
-  if (!handLandmarker) return;
+  if (!handLandmarker || !poseLandmarker) return;
 
   if (video.currentTime !== lastVideoTime) {
     lastVideoTime = video.currentTime;
 
-    const results = handLandmarker.detectForVideo(
-      video,
-      performance.now()
-    );
+    const now = performance.now();
 
-    rawData.textContent = JSON.stringify(results, null, 2);
-    drawResults(results);
-    updateGestureOutput(results);
+    const handResults = handLandmarker.detectForVideo(video, now);
+    const mode = getInteractionMode(handResults);
+
+    const firstHand = handResults.landmarks?.[0];
+
+    if (firstHand) {
+      const palmSize = getPalmSize(firstHand);
+      modeOutput.textContent = `Aktiver Modus: ${mode} | Palm Size: ${Math.round(palmSize)}px`;
+    } else {
+      modeOutput.textContent = `Aktiver Modus: ${mode}`;
+    }
+
+    if (mode === "near") {
+      rawData.textContent = JSON.stringify(handResults, null, 2);
+      drawResults(handResults);
+      updateGestureOutput(handResults);
+    }
+
+    if (mode === "far") {
+      const poseResults = poseLandmarker.detectForVideo(video, now);
+
+      rawData.textContent = JSON.stringify(poseResults, null, 2);
+      drawPoseResults(poseResults);
+
+      resetGestureState();
+      gestureOutput.textContent =
+        "Distanzmodus aktiv: Körperdaten werden ausgewertet.";
+    }
+
+    if (mode === "no-hand") {
+      const poseResults = poseLandmarker.detectForVideo(video, now);
+
+      rawData.textContent = JSON.stringify(poseResults, null, 2);
+      drawPoseResults(poseResults);
+
+      resetGestureState();
+      gestureOutput.textContent = "Keine nahe Hand erkannt. Körpermodus aktiv.";
+    }
   }
 
   requestAnimationFrame(predictWebcam);
@@ -127,12 +213,40 @@ function predictWebcam() {
 startButton.addEventListener("click", async () => {
   startButton.disabled = true;
 
-  if (!handLandmarker) {
-    await initHandLandmarker();
+  if (!handLandmarker || !poseLandmarker) {
+    await initMediaPipe();
   }
 
   await startCamera();
 });
+
+function getPalmSize(handLandmarks) {
+  const wrist = handLandmarks[0];
+  const indexBase = handLandmarks[5];
+  const middleBase = handLandmarks[9];
+  const ringBase = handLandmarks[13];
+  const pinkyBase = handLandmarks[17];
+
+  const wristToMiddle = getDistanceInPixels(wrist, middleBase);
+  const indexToPinky = getDistanceInPixels(indexBase, pinkyBase);
+
+  return (wristToMiddle + indexToPinky) / 2;
+}
+
+function getInteractionMode(results) {
+  if (!results.landmarks || results.landmarks.length === 0) {
+    return "no-hand";
+  }
+
+  const firstHand = results.landmarks[0];
+  const palmSize = getPalmSize(firstHand);
+
+  if (palmSize >= closePalmThreshold) {
+    return "near";
+  }
+
+  return "far";
+}
 
 function getDistanceInPixels(pointA, pointB) {
   const deltaX = (pointA.x - pointB.x) * canvas.width;
@@ -179,7 +293,7 @@ function detectFist(handLandmarks) {
     };
   }
 
-  return null;  
+  return null;
 }
 
 function detectGesture(handLandmarks) {
@@ -226,11 +340,9 @@ function updateGestureOutput(results) {
   }
 
   if (stableGesture) {
-    gestureOutput.textContent =
-      `${stableGesture} | ${detectedGesture.details}`;
+    gestureOutput.textContent = `${stableGesture} | ${detectedGesture.details}`;
   } else {
-    gestureOutput.textContent =
-      `${detectedGesture.name} wird geprüft | ${detectedGesture.details}`;
+    gestureOutput.textContent = `${detectedGesture.name} wird geprüft | ${detectedGesture.details}`;
   }
 }
 

@@ -6,6 +6,8 @@ import {
   FilesetResolver,
 } from "@mediapipe/tasks-vision";
 
+import { GestureRecognizer } from "./lib/GestureRecognizer.js";
+
 const startButton = document.querySelector("#startButton");
 const video = document.querySelector("#webcam");
 const rawData = document.querySelector("#rawData");
@@ -13,6 +15,9 @@ const canvas = document.querySelector("#overlay");
 const ctx = canvas.getContext("2d");
 const gestureOutput = document.querySelector("#gestureOutput");
 const modeOutput = document.querySelector("#modeOutput");
+const gestureRecognizer = new GestureRecognizer({
+  requiredGestureFrames: 15,
+});
 
 let handLandmarker;
 let poseLandmarker;
@@ -182,7 +187,8 @@ function predictWebcam() {
     if (mode === "near") {
       rawData.textContent = JSON.stringify(handResults, null, 2);
       drawResults(handResults);
-      updateGestureOutput(handResults);
+      const gestureResult = gestureRecognizer.detect(handResults, gestureUtils);
+      updateGestureOutput(gestureResult);
     }
 
     if (mode === "far") {
@@ -191,7 +197,7 @@ function predictWebcam() {
       rawData.textContent = JSON.stringify(poseResults, null, 2);
       drawPoseResults(poseResults);
 
-      resetGestureState();
+      gestureRecognizer.reset();
       gestureOutput.textContent =
         "Distanzmodus aktiv: Körperdaten werden ausgewertet.";
     }
@@ -202,7 +208,7 @@ function predictWebcam() {
       rawData.textContent = JSON.stringify(poseResults, null, 2);
       drawPoseResults(poseResults);
 
-      resetGestureState();
+      gestureRecognizer.reset();
       gestureOutput.textContent = "Keine nahe Hand erkannt. Körpermodus aktiv.";
     }
   }
@@ -255,99 +261,15 @@ function getDistanceInPixels(pointA, pointB) {
   return Math.sqrt(deltaX ** 2 + deltaY ** 2);
 }
 
-function detectPinch(handLandmarks) {
-  const thumbTip = handLandmarks[4];
-  const indexFingerTip = handLandmarks[8];
-
-  const distance = getDistanceInPixels(thumbTip, indexFingerTip);
-  const threshold = 30;
-
-  if (distance < threshold) {
-    return {
-      name: "Pinch",
-      isActive: true,
-      details: `Abstand Daumen–Zeigefinger: ${Math.round(distance)}px`,
-    };
-  }
-
-  return null;
+function updateGestureOutput(gestureResult) {
+  gestureOutput.textContent = gestureResult.message;
 }
 
-function detectFist(handLandmarks) {
-  const wrist = handLandmarks[0];
-  const thumbTip = handLandmarks[4];
-  const fingerTips = [4, 8, 12, 16, 20].map((idx) => handLandmarks[idx]);
+const gestureUtils = {
+  getDistanceInPixels(pointA, pointB) {
+    const deltaX = (pointA.x - pointB.x) * canvas.width;
+    const deltaY = (pointA.y - pointB.y) * canvas.height;
 
-  const distances = fingerTips.map((tip) => getDistanceInPixels(wrist, tip));
-  const distanceThumb = getDistanceInPixels(handLandmarks[6], thumbTip);
-  const averageDistance =
-    distances.reduce((sum, d) => sum + d, 0) / distances.length;
-
-  const threshold = 80;
-
-  if (averageDistance < threshold && distanceThumb < threshold) {
-    return {
-      name: "Fist",
-      isActive: true,
-      details: `Durchschnittlicher Abstand Handgelenk–Fingerkuppen: ${Math.round(averageDistance)}px`,
-    };
-  }
-
-  return null;
-}
-
-function detectGesture(handLandmarks) {
-  const pinch = detectPinch(handLandmarks);
-  const fist = detectFist(handLandmarks);
-
-  if (pinch) {
-    return pinch;
-  }
-
-  if (fist) {
-    return fist;
-  }
-
-  return null;
-}
-
-function updateGestureOutput(results) {
-  if (!results.landmarks || results.landmarks.length === 0) {
-    resetGestureState();
-    gestureOutput.textContent = "Keine Hand erkannt";
-    return;
-  }
-
-  const firstHand = results.landmarks[0];
-  const detectedGesture = detectGesture(firstHand);
-
-  if (!detectedGesture) {
-    resetGestureState();
-    gestureOutput.textContent = "Keine Geste erkannt";
-    return;
-  }
-
-  if (detectedGesture.name === currentGestureCandidate) {
-    gestureFrameCount += 1;
-  } else {
-    currentGestureCandidate = detectedGesture.name;
-    gestureFrameCount = 1;
-    stableGesture = null;
-  }
-
-  if (gestureFrameCount >= requiredGestureFrames) {
-    stableGesture = detectedGesture.name;
-  }
-
-  if (stableGesture) {
-    gestureOutput.textContent = `${stableGesture} | ${detectedGesture.details}`;
-  } else {
-    gestureOutput.textContent = `${detectedGesture.name} wird geprüft | ${detectedGesture.details}`;
-  }
-}
-
-function resetGestureState() {
-  currentGestureCandidate = null;
-  gestureFrameCount = 0;
-  stableGesture = null;
-}
+    return Math.sqrt(deltaX ** 2 + deltaY ** 2);
+  },
+};

@@ -8,12 +8,14 @@ import {
 
 import { GestureRecognizer } from "./lib/GestureRecognizer.js";
 import { pinchGesture, fistGesture } from "./lib/gestures.js";
+import { createGestureUtils } from "./lib/utils.js";
 
 const startButton = document.querySelector("#startButton");
 const video = document.querySelector("#webcam");
 const rawData = document.querySelector("#rawData");
 const canvas = document.querySelector("#overlay");
 const ctx = canvas.getContext("2d");
+const gestureUtils = createGestureUtils(canvas);
 const gestureOutput = document.querySelector("#gestureOutput");
 const modeOutput = document.querySelector("#modeOutput");
 const gestureRecognizer = new GestureRecognizer({
@@ -51,11 +53,6 @@ const connections = [
   [0, 17], // Handkante
 ];
 
-let currentGestureCandidate = null;
-let gestureFrameCount = 0;
-let stableGesture = null;
-
-const requiredGestureFrames = 15;
 const closePalmThreshold = 70;
 
 async function initPoseLandmarker(vision) {
@@ -182,7 +179,7 @@ function predictWebcam() {
     const firstHand = handResults.landmarks?.[0];
 
     if (firstHand) {
-      const palmSize = getPalmSize(firstHand);
+      const palmSize = gestureUtils.getPalmSize(firstHand);
       modeOutput.textContent = `Aktiver Modus: ${mode} | Palm Size: ${Math.round(palmSize)}px`;
     } else {
       modeOutput.textContent = `Aktiver Modus: ${mode}`;
@@ -200,9 +197,7 @@ function predictWebcam() {
 
       const gestureResult = gestureRecognizer.detect(gestureInput);
       updateGestureOutput(gestureResult);
-    }
-
-    if (mode === "far") {
+    } else if (mode === "far") {
       const poseResults = poseLandmarker.detectForVideo(video, now);
 
       rawData.textContent = JSON.stringify(poseResults, null, 2);
@@ -211,9 +206,7 @@ function predictWebcam() {
       gestureRecognizer.reset();
       gestureOutput.textContent =
         "Distanzmodus aktiv: Körperdaten werden ausgewertet.";
-    }
-
-    if (mode === "no-hand") {
+    } else if (mode === "no-hand") {
       const poseResults = poseLandmarker.detectForVideo(video, now);
 
       rawData.textContent = JSON.stringify(poseResults, null, 2);
@@ -237,27 +230,13 @@ startButton.addEventListener("click", async () => {
   await startCamera();
 });
 
-function getPalmSize(handLandmarks) {
-  const wrist = handLandmarks[0];
-  const indexBase = handLandmarks[5];
-  const middleBase = handLandmarks[9];
-  const ringBase = handLandmarks[13];
-  const pinkyBase = handLandmarks[17];
-
-  const wristToMiddle = getDistanceInPixels(wrist, middleBase);
-  const indexToPinky = getDistanceInPixels(indexBase, pinkyBase);
-
-  return (wristToMiddle + indexToPinky) / 2;
-}
-
 function getInteractionMode(results) {
   if (!results.landmarks || results.landmarks.length === 0) {
     return "no-hand";
   }
 
   const firstHand = results.landmarks[0];
-  const palmSize = getPalmSize(firstHand);
-
+  const palmSize = gestureUtils.getPalmSize(firstHand);
   if (palmSize >= closePalmThreshold) {
     return "near";
   }
@@ -265,22 +244,11 @@ function getInteractionMode(results) {
   return "far";
 }
 
-function getDistanceInPixels(pointA, pointB) {
-  const deltaX = (pointA.x - pointB.x) * canvas.width;
-  const deltaY = (pointA.y - pointB.y) * canvas.height;
-
-  return Math.sqrt(deltaX ** 2 + deltaY ** 2);
-}
-
 function updateGestureOutput(gestureResult) {
+  if (!gestureResult) {
+    gestureOutput.textContent = "Keine Geste erkannt";
+    return;
+  }
+
   gestureOutput.textContent = gestureResult.message;
 }
-
-const gestureUtils = {
-  getDistanceInPixels(pointA, pointB) {
-    const deltaX = (pointA.x - pointB.x) * canvas.width;
-    const deltaY = (pointA.y - pointB.y) * canvas.height;
-
-    return Math.sqrt(deltaX ** 2 + deltaY ** 2);
-  },
-};

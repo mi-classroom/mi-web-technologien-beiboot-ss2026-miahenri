@@ -74,3 +74,49 @@ export const fistGesture = {
     return null;
   },
 };
+
+export const thumbsUpGesture = {
+  name: "Thumbs Up",
+
+  detect(input) {
+    const handLandmarks = input.hands[0];
+
+    if (!handLandmarks) {
+      return null;
+    }
+
+    const wrist = handLandmarks[0];
+
+    const thumbTip = handLandmarks[4];
+    const thumbBase = handLandmarks[2];
+
+    const indexTip = handLandmarks[8];
+    const middleTip = handLandmarks[12];
+    const ringTip = handLandmarks[16];
+    const pinkyTip = handLandmarks[20];
+
+    const palmSize = input.utils.getPalmSize(handLandmarks);
+
+    const thumbPointsUp = thumbTip.y < thumbBase.y - 0.08;
+
+    const otherFingersCloseToPalm = [
+      indexTip,
+      middleTip,
+      ringTip,
+      pinkyTip,
+    ].every((tip) => {
+      const distance = input.utils.getDistanceInPixels(wrist, tip);
+      return distance < palmSize * 2;
+    });
+
+    if (thumbPointsUp && otherFingersCloseToPalm) {
+      return {
+        name: "Thumbs Up",
+        isActive: true,
+        details: "Daumen zeigt nach oben, andere Finger sind eingeklappt",
+      };
+    }
+
+    return null;
+  },
+};

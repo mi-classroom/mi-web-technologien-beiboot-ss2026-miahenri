@@ -7,7 +7,11 @@ import {
 } from "@mediapipe/tasks-vision";
 
 import { GestureRecognizer } from "./lib/GestureRecognizer.js";
-import { pinchGesture, fistGesture } from "./lib/gestures.js";
+import {
+  pinchGesture,
+  fistGesture,
+  thumbsUpGesture,
+} from "./lib/gestures.js";
 import { createGestureUtils } from "./lib/utils.js";
 
 const startButton = document.querySelector("#startButton");
@@ -24,6 +28,7 @@ const gestureRecognizer = new GestureRecognizer({
 
 gestureRecognizer.registerGesture(pinchGesture);
 gestureRecognizer.registerGesture(fistGesture);
+gestureRecognizer.registerGesture(thumbsUpGesture);
 
 let handLandmarker;
 let poseLandmarker;

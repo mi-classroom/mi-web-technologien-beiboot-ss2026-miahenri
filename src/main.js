@@ -7,6 +7,7 @@ import {
 } from "@mediapipe/tasks-vision";
 
 import { GestureRecognizer } from "./lib/GestureRecognizer.js";
+import { pinchGesture, fistGesture } from "./lib/gestures.js";
 
 const startButton = document.querySelector("#startButton");
 const video = document.querySelector("#webcam");
@@ -18,6 +19,9 @@ const modeOutput = document.querySelector("#modeOutput");
 const gestureRecognizer = new GestureRecognizer({
   requiredGestureFrames: 15,
 });
+
+gestureRecognizer.registerGesture(pinchGesture);
+gestureRecognizer.registerGesture(fistGesture);
 
 let handLandmarker;
 let poseLandmarker;
@@ -187,7 +191,14 @@ function predictWebcam() {
     if (mode === "near") {
       rawData.textContent = JSON.stringify(handResults, null, 2);
       drawResults(handResults);
-      const gestureResult = gestureRecognizer.detect(handResults, gestureUtils);
+
+      const gestureInput = {
+        hands: handResults.landmarks ?? [],
+        mode,
+        utils: gestureUtils,
+      };
+
+      const gestureResult = gestureRecognizer.detect(gestureInput);
       updateGestureOutput(gestureResult);
     }
 

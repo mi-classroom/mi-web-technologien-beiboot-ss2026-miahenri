@@ -11,6 +11,7 @@ import {
   pinchGesture,
   fistGesture,
   thumbsUpGesture,
+  thumbsDownGesture,
 } from "./lib/gestures.js";
 import { createGestureUtils } from "./lib/utils.js";
 
@@ -29,6 +30,7 @@ const gestureRecognizer = new GestureRecognizer({
 gestureRecognizer.registerGesture(pinchGesture);
 gestureRecognizer.registerGesture(fistGesture);
 gestureRecognizer.registerGesture(thumbsUpGesture);
+gestureRecognizer.registerGesture(thumbsDownGesture);
 
 let handLandmarker;
 let poseLandmarker;

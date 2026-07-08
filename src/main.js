@@ -6,14 +6,14 @@ import {
   FilesetResolver,
 } from "@mediapipe/tasks-vision";
 
-import { GestureRecognizer } from "./lib/GestureRecognizer.js";
 import {
+  GestureRecognizer,
+  createGestureUtils,
   pinchGesture,
   fistGesture,
   thumbsUpGesture,
   thumbsDownGesture,
-} from "./lib/gestures.js";
-import { createGestureUtils } from "./lib/utils.js";
+} from "./lib/index.js";
 
 const startButton = document.querySelector("#startButton");
 const video = document.querySelector("#webcam");

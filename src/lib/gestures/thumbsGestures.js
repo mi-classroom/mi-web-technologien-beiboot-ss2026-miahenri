@@ -1,4 +1,5 @@
 export const thumbsUpGesture = {
+  id: "thumbs-up",
   name: "Thumbs Up",
 
   detect(input) {
@@ -34,7 +35,6 @@ export const thumbsUpGesture = {
 
     if (thumbPointsUp && otherFingersCloseToPalm) {
       return {
-        name: "Thumbs Up",
         isActive: true,
         details: "Daumen zeigt nach oben, andere Finger sind eingeklappt",
       };
@@ -45,6 +45,7 @@ export const thumbsUpGesture = {
 };
 
 export const thumbsDownGesture = {
+  id: "thumbs-down",
   name: "Thumbs Down",
 
   detect(input) {
@@ -80,7 +81,6 @@ export const thumbsDownGesture = {
 
     if (thumbPointsDown && otherFingersCloseToPalm) {
       return {
-        name: "Thumbs Down",
         isActive: true,
         details: "Daumen zeigt nach unten, andere Finger sind eingeklappt",
       };

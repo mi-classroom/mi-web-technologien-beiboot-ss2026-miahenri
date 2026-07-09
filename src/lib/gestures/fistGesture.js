@@ -1,4 +1,5 @@
 export const fistGesture = {
+  id: "fist",
   name: "Fist",
 
   detect(input) {
@@ -31,7 +32,6 @@ export const fistGesture = {
 
     if (averageDistance < threshold && distanceThumb < threshold) {
       return {
-        name: "Fist",
         isActive: true,
         details: `Durchschnittlicher Abstand Handgelenk–Fingerkuppen: ${Math.round(
           averageDistance

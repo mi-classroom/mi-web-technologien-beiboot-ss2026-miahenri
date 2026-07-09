@@ -10,6 +10,30 @@ export class GestureRecognizer {
   }
 
   registerGesture(gesture) {
+    if (!gesture || typeof gesture !== "object") {
+      throw new Error("Gesture must be an object.");
+    }
+
+    if (!gesture.id || typeof gesture.id !== "string") {
+      throw new Error("Gesture must have a string id.");
+    }
+
+    if (!gesture.name || typeof gesture.name !== "string") {
+      throw new Error("Gesture must have a string name.");
+    }
+
+    if (typeof gesture.detect !== "function") {
+      throw new Error("Gesture must have a detect(input) function.");
+    }
+
+    const alreadyRegistered = this.gestures.some(
+      (registeredGesture) => registeredGesture.id === gesture.id,
+    );
+
+    if (alreadyRegistered) {
+      throw new Error(`Gesture with id "${gesture.id}" is already registered.`);
+    }
+
     this.gestures.push(gesture);
   }
 
@@ -55,10 +79,18 @@ export class GestureRecognizer {
 
   findGesture(input) {
     for (const gesture of this.gestures) {
-      const result = gesture.detect(input);
+      try {
+        const result = gesture.detect(input);
 
-      if (result) {
-        return result;
+        if (result) {
+          return {
+            id: gesture.id,
+            name: gesture.name,
+            ...result,
+          };
+        }
+      } catch (error) {
+        console.warn(`Gesture "${gesture.id}" failed during detection:`, error);
       }
     }
 

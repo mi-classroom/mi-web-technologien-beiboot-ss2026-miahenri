@@ -1,4 +1,5 @@
 export const pinchGesture = {
+  id: "pinch",
   name: "Pinch",
 
   detect(input) {
@@ -20,7 +21,6 @@ export const pinchGesture = {
 
     if (distance < threshold) {
       return {
-        name: "Pinch",
         isActive: true,
         details: `Abstand Daumen–Zeigefinger: ${Math.round(distance)}px`,
       };

@@ -5,14 +5,71 @@ Zum Modul Web Technologien gibt es ein begleitendes Projekt. Im Rahmen dieses Pr
 Als organisatorischen Rahmen für das Projekt nutzen wir GitHub Classroom. 
 
 ## 👋 Gestenbasierte Steuerung im Browser
-Die Grundidee des Projekts ist ein browserbasiertes System, das Körper- oder Handbewegungen erkennt und diese später auf Funktionen abbilden kann.
+Dieses Projekt ist eine browserbasierte Demo zur Erkennung von Handgesten mit MediaPipe. Die Anwendung nutzt die Webcam, erkennt Hand- und Pose-Landmarks und übergibt diese Daten an eine eigene kleine Gesture-Library.
 
-Aktuell befindet sich das Projekt noch in der Anfangsphase. 
-**Bisher umgesetzte Issues:**
-- [Kamera & Körperdaten im Browser](https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2026-miahenri/issues/1)
+Die eigentliche Gestenerkennung liegt im Ordner `src/lib/`. Die Demo-Anwendung liegt in `src/main.js` und `src/demo/` und ist für Kamera, MediaPipe-Setup, Canvas-Zeichnung und UI-Ausgabe zuständig.
 
-**Aktuell in Arbeit:**
-- [Vom Rohsignal zur Geste: Vokabular & Abstraktion](https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2026-miahenri/issues/2)
+### Aktuelle Funktionen
+- Webcam-basierte Handerkennung mit MediaPipe
+- Unterscheidung zwischen Nah- und Distanzmodus
+- Erkennung registrierter Gesten über eine eigene Library-Struktur
+- Aktuell implementierte Gesten:
+  - Pinch
+  - Fist
+  - Thumbs Up
+  - Thumbs Down
+- Stabilisierung erkannter Gesten über mehrere Frames
+- Erweiterbare Struktur für neue Gesten
+
+## Projektstruktur
+```txt
+src/
+├── main.js
+├── style.css
+├── demo/
+│   ├── drawing.js
+│   └── mediapipe.js
+└── lib/
+    ├── index.js
+    ├── GestureRecognizer.js
+    ├── utils.js
+    └── gestures/
+        ├── index.js
+        ├── pinch.js
+        ├── fist.js
+        ├── thumbsUp.js
+        └── thumbsDown.js
+```
+
+## Projekt lokal ausführen
+
+### Voraussetzungen
+
+Für das Projekt wird Node.js benötigt. Außerdem muss der Browser Zugriff auf eine Webcam haben.
+
+### Repository herunterladen
+
+```bash
+git clone <repository-url>
+cd <repository-name>
+````
+### Abhängigkeiten installieren und Entwicklungsserver starten
+Das Projekt nutzt Vite. Die Demo kann deshalb mit folgendem Befehl gestartet werden:
+
+```bash
+npm install
+npm run dev
+````
+Vite gibt danach im Terminal eine lokale Adresse aus, zum Beispiel:
+http://localhost:5173/
+
+### Demo testen
+1. Im Browser die lokale Vite-Adresse öffnen.
+2. Auf den Startbutton klicken.
+3. Den Zugriff auf die Webcam erlauben.
+4. Eine Hand vor die Kamera halten.
+5. Die Anwendung zeigt erkannte Hand- oder Pose-Daten sowie erkannte Gesten an.
+
 
 ## 📋 Dokumentation
 Die Dokumentation zur Umsetzung des Projekts und die Details zu den unterschiedlichen Architectual Decision Records (ADRs) sind im Ordner "adrs" zu finden, sowie im [Wiki](https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2026-miahenri/wiki) dieses Repositorys.

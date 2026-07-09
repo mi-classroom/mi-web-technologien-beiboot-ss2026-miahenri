@@ -1,10 +1,6 @@
 import "./style.css";
 
-import {
-  HandLandmarker,
-  PoseLandmarker,
-  FilesetResolver,
-} from "@mediapipe/tasks-vision";
+import { initMediaPipeModels } from "./demo/mediapipe.js";
 
 import {
   drawHandResults,
@@ -43,36 +39,13 @@ let lastVideoTime = -1;
 
 const closePalmThreshold = 70;
 
-async function initPoseLandmarker(vision) {
-  poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath:
-        "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
-      delegate: "GPU",
-    },
-    runningMode: "VIDEO",
-    numPoses: 1,
-  });
-}
-
-async function initMediaPipe() {
+async function loadTrackingModels() {
   rawData.textContent = "MediaPipe wird geladen...";
 
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm",
-  );
+  const models = await initMediaPipeModels();
 
-  handLandmarker = await HandLandmarker.createFromOptions(vision, {
-    baseOptions: {
-      modelAssetPath:
-        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task",
-      delegate: "GPU",
-    },
-    runningMode: "VIDEO",
-    numHands: 2,
-  });
-
-  await initPoseLandmarker(vision);
+  handLandmarker = models.handLandmarker;
+  poseLandmarker = models.poseLandmarker;
 
   rawData.textContent = "MediaPipe ist bereit. Kamera kann gestartet werden.";
 }
@@ -155,7 +128,7 @@ startButton.addEventListener("click", async () => {
   startButton.disabled = true;
 
   if (!handLandmarker || !poseLandmarker) {
-    await initMediaPipe();
+    await loadTrackingModels();
   }
 
   await startCamera();

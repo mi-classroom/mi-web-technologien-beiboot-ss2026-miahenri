@@ -3,7 +3,7 @@
 * Workload: 6h
 * Decider: [Mia Henrichsmeyer](https://github.com/miahenri)
 * Issue: [2](https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2026-miahenri/issues/2)
-* Date: 2026-02-6
+* Date: 2026-02-06
 
 ## Context and Problem Statement
 ### Schritt 1

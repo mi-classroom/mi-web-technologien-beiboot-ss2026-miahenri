@@ -72,7 +72,7 @@ http://localhost:5173/
 
 
 ## 📋 Dokumentation
-Die Dokumentation zur Umsetzung des Projekts und die Details zu den unterschiedlichen Architectual Decision Records (ADRs) sind im Ordner "adrs" zu finden, sowie im [Wiki](https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2026-miahenri/wiki) dieses Repositorys.
+Die Dokumentation zur Umsetzung des Projekts und die Details zu den unterschiedlichen Architectual Decision Records (ADRs) sind unter `docs/adrs/` zu finden, sowie in der API Dokumentation unter `docs/api.md`.
 
 ## 👩🏽‍💻 Mitwirkende
 Contributor: [Mia Henrichsmeyer](https://github.com/miahenri)

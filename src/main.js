@@ -14,6 +14,9 @@ import {
   fistGesture,
   thumbsUpGesture,
   thumbsDownGesture,
+  rightArmUpGesture,
+  leftArmUpGesture,
+  bothArmsUpGesture,
 } from "./lib/index.js";
 
 const startButton = document.querySelector("#startButton");
@@ -32,6 +35,11 @@ gestureRecognizer.registerGesture(pinchGesture);
 gestureRecognizer.registerGesture(fistGesture);
 gestureRecognizer.registerGesture(thumbsUpGesture);
 gestureRecognizer.registerGesture(thumbsDownGesture);
+
+gestureRecognizer.registerGesture(bothArmsUpGesture);
+gestureRecognizer.registerGesture(rightArmUpGesture);
+gestureRecognizer.registerGesture(leftArmUpGesture);
+
 
 let handLandmarker;
 let poseLandmarker;
@@ -102,15 +110,21 @@ function predictWebcam() {
       const gestureResult = gestureRecognizer.detect(gestureInput);
       updateGestureOutput(gestureResult);
     } else if (mode === "far") {
-      const poseResults = poseLandmarker.detectForVideo(video, now);
+  const poseResults = poseLandmarker.detectForVideo(video, now);
 
-      rawData.textContent = JSON.stringify(poseResults, null, 2);
-      drawPoseResults(poseResults, canvas, ctx);
+  rawData.textContent = JSON.stringify(poseResults, null, 2);
+  drawPoseResults(poseResults, canvas, ctx);
 
-      gestureRecognizer.reset();
-      gestureOutput.textContent =
-        "Distanzmodus aktiv: Körperdaten werden ausgewertet.";
-    } else if (mode === "no-hand") {
+  const gestureInput = {
+    hands: handResults.landmarks ?? [],
+    pose: poseResults.landmarks?.[0] ?? null,
+    mode,
+    utils: gestureUtils,
+  };
+
+  const gestureResult = gestureRecognizer.detect(gestureInput);
+  updateGestureOutput(gestureResult);
+} else if (mode === "no-hand") {
       const poseResults = poseLandmarker.detectForVideo(video, now);
 
       rawData.textContent = JSON.stringify(poseResults, null, 2);

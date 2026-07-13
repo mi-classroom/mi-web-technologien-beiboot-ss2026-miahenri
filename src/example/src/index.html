@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MILO</title>
+    <link rel="stylesheet" href="./styles/combined.css" />
+    <link rel="stylesheet" href="./styles/index.css" />
+    <link rel="icon" href="../favicon.ico" />
+  </head>
+  <body>
+    <header aria-label="Header">
+      <h1>milo</h1>
+      <nav aria-label="Navigation">
+        <a href="/über-uns" class="button">Über uns</a>
+        <a href="/anleitung" class="button">Anleitung</a>
+      </nav>
+    </header>
+    <main aria-label="Hauptinhalt">
+      <h2>Musik hören. <span class="yellow">Ohne Barrieren.</span></h2>
+      <p class="text" aria-label="Beschreibung">
+        milo ist ein minimalistischer Web-Musikplayer, der speziell für Menschen
+        mit motorischen Einschränkungen entwickelt wurde. Ganz ohne Maus –
+        vollständig über die Tastatur bedienbar.
+      </p>
+      <p class="text bold">Intuitiv. Reduziert. Zugänglich.</p>
+
+      <div class="icon-container" aria-label="Funktionen">
+        <div>
+          <img src="../assets/icons/barrierearm.svg" class="icon-index" />
+          <p class="description">Barrierearme Oberfläche</p>
+        </div>
+
+        <div>
+          <img src="../assets/icons/keyboard.svg" class="icon-index" />
+          <p class="description">Tastatursteuerung</p>
+        </div>
+
+        <div>
+          <img src="../assets/icons/screenreader.svg" class="icon-index" />
+          <p class="description">Kompatibel mit Screenreader</p>
+        </div>
+
+        <div>
+          <img src="../assets/icons/nutzung.svg" class="icon-index" />
+          <p class="description">Einfache Nutzung</p>
+        </div>
+      </div>
+
+      <button id="start-btn" class="button"><a href="./player.html">Jetzt starten</a></button>
+    </main>
+  </body>
+</html>

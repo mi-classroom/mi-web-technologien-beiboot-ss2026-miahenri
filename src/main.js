@@ -27,18 +27,22 @@ const ctx = canvas.getContext("2d");
 const gestureUtils = createGestureUtils(canvas);
 const gestureOutput = document.querySelector("#gestureOutput");
 const modeOutput = document.querySelector("#modeOutput");
-const gestureRecognizer = new GestureRecognizer({
+const nearGestureRecognizer = new GestureRecognizer({
   requiredGestureFrames: 15,
 });
 
-gestureRecognizer.registerGesture(pinchGesture);
-gestureRecognizer.registerGesture(fistGesture);
-gestureRecognizer.registerGesture(thumbsUpGesture);
-gestureRecognizer.registerGesture(thumbsDownGesture);
+const farGestureRecognizer = new GestureRecognizer({
+  requiredGestureFrames: 15,
+});
 
-gestureRecognizer.registerGesture(bothArmsUpGesture);
-gestureRecognizer.registerGesture(rightArmUpGesture);
-gestureRecognizer.registerGesture(leftArmUpGesture);
+nearGestureRecognizer.registerGesture(pinchGesture);
+nearGestureRecognizer.registerGesture(fistGesture);
+nearGestureRecognizer.registerGesture(thumbsUpGesture);
+nearGestureRecognizer.registerGesture(thumbsDownGesture);
+
+farGestureRecognizer.registerGesture(bothArmsUpGesture);
+farGestureRecognizer.registerGesture(rightArmUpGesture);
+farGestureRecognizer.registerGesture(leftArmUpGesture);
 
 
 let handLandmarker;
@@ -98,41 +102,38 @@ function predictWebcam() {
     }
 
     if (mode === "near") {
-      rawData.textContent = JSON.stringify(handResults, null, 2);
-      drawHandResults(handResults, canvas, ctx);
+  rawData.textContent = JSON.stringify(handResults, null, 2);
+  drawHandResults(handResults, canvas, ctx);
 
-      const gestureInput = {
-        hands: handResults.landmarks ?? [],
-        mode,
-        utils: gestureUtils,
-      };
+  const gestureInput = {
+    hands: handResults.landmarks ?? [],
+    pose: null,
+    mode,
+    utils: gestureUtils,
+  };
 
-      const gestureResult = gestureRecognizer.detect(gestureInput);
-      updateGestureOutput(gestureResult);
-    } else if (mode === "far") {
+  const gestureResult = nearGestureRecognizer.detect(gestureInput);
+  updateGestureOutput(gestureResult);
+
+  farGestureRecognizer.reset();
+} else {
   const poseResults = poseLandmarker.detectForVideo(video, now);
 
   rawData.textContent = JSON.stringify(poseResults, null, 2);
   drawPoseResults(poseResults, canvas, ctx);
 
   const gestureInput = {
-    hands: handResults.landmarks ?? [],
+    hands: [],
     pose: poseResults.landmarks?.[0] ?? null,
     mode,
     utils: gestureUtils,
   };
 
-  const gestureResult = gestureRecognizer.detect(gestureInput);
+  const gestureResult = farGestureRecognizer.detect(gestureInput);
   updateGestureOutput(gestureResult);
-} else if (mode === "no-hand") {
-      const poseResults = poseLandmarker.detectForVideo(video, now);
 
-      rawData.textContent = JSON.stringify(poseResults, null, 2);
-      drawPoseResults(poseResults, canvas, ctx);
-
-      gestureRecognizer.reset();
-      gestureOutput.textContent = "Keine nahe Hand erkannt. Körpermodus aktiv.";
-    }
+  nearGestureRecognizer.reset();
+}
   }
 
   requestAnimationFrame(predictWebcam);

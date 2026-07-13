@@ -18,6 +18,10 @@ const albumElement = document.getElementById("js-album");
 let queue = [];
 let currentIndex = 0;
 
+let startCamera;
+let getInteractionMode;
+let predictWebcam;
+
 const playerState = {
   playing: false,
   error: false,
@@ -73,7 +77,7 @@ document.getElementById("backToPlayerBtn").addEventListener("click", () => {
   document.getElementById("playerView").style.display = "block";
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const fileName = localStorage.getItem("milo-file-name");
   const fileType = localStorage.getItem("milo-file-type");
   const savedTime = localStorage.getItem("milo-current-time");
@@ -82,6 +86,18 @@ window.addEventListener("DOMContentLoaded", () => {
     status.textContent = `Letzter Track: ${fileName}`;
     // Der Benutzer muss die Datei erneut manuell auswählen:
     status.textContent += " – bitte Datei erneut auswählen";
+  }
+
+  try {
+    const gestureControls = await import("./gestureControls.js");
+
+    startCamera = gestureControls.startCamera;
+
+    if (typeof startCamera === "function") {
+      await startCamera(handleGestureAction);
+    }
+  } catch (error) {
+    status.textContent = `Gestensteuerung konnte nicht geladen werden: ${error.message}`;
   }
 });
 
@@ -221,6 +237,40 @@ function updateTimeDisplay() {
   const total = isNaN(audio.duration) ? "00:00" : formatTime(audio.duration);
   currentTimeDisplay.textContent = current;
   durationDisplay.textContent = total;
+}
+
+function handleGestureAction(gestureResult) {
+  const gesture = gestureResult.gesture;
+
+  if (!gesture || !gesture.justBecameStable) {
+    return;
+  }
+
+  switch (gesture.id) {
+    case "pinch":
+      togglePlayPause();
+      break;
+
+    case "fist":
+      toggleMute();
+      break;
+
+    case "thumbs-up":
+      increaseVolume();
+      break;
+
+    case "thumbs-down":
+      decreaseVolume();
+      break;
+
+    case "right-arm-up":
+      playNextTrack();
+      break;
+
+    case "left-arm-up":
+      playPreviousTrack();
+      break;
+  }
 }
 
 document.addEventListener("keydown", (event) => {

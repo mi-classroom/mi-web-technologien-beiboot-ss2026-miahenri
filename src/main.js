@@ -2,10 +2,7 @@ import "./style.css";
 
 import { initMediaPipeModels } from "./demo/mediapipe.js";
 
-import {
-  drawHandResults,
-  drawPoseResults,
-} from "./demo/drawing.js";
+import { drawHandResults, drawPoseResults } from "./demo/drawing.js";
 
 import {
   GestureRecognizer,
@@ -43,7 +40,6 @@ nearGestureRecognizer.registerGesture(thumbsDownGesture);
 farGestureRecognizer.registerGesture(bothArmsUpGesture);
 farGestureRecognizer.registerGesture(rightArmUpGesture);
 farGestureRecognizer.registerGesture(leftArmUpGesture);
-
 
 let handLandmarker;
 let poseLandmarker;
@@ -102,38 +98,38 @@ function predictWebcam() {
     }
 
     if (mode === "near") {
-  rawData.textContent = JSON.stringify(handResults, null, 2);
-  drawHandResults(handResults, canvas, ctx);
+      rawData.textContent = JSON.stringify(handResults, null, 2);
+      drawHandResults(handResults, canvas, ctx);
 
-  const gestureInput = {
-    hands: handResults.landmarks ?? [],
-    pose: null,
-    mode,
-    utils: gestureUtils,
-  };
+      const gestureInput = {
+        hands: handResults.landmarks ?? [],
+        pose: null,
+        mode,
+        utils: gestureUtils,
+      };
 
-  const gestureResult = nearGestureRecognizer.detect(gestureInput);
-  updateGestureOutput(gestureResult);
+      const gestureResult = nearGestureRecognizer.detect(gestureInput);
+      updateGestureOutput(gestureResult);
 
-  farGestureRecognizer.reset();
-} else {
-  const poseResults = poseLandmarker.detectForVideo(video, now);
+      farGestureRecognizer.reset();
+    } else {
+      const poseResults = poseLandmarker.detectForVideo(video, now);
 
-  rawData.textContent = JSON.stringify(poseResults, null, 2);
-  drawPoseResults(poseResults, canvas, ctx);
+      rawData.textContent = JSON.stringify(poseResults, null, 2);
+      drawPoseResults(poseResults, canvas, ctx);
 
-  const gestureInput = {
-    hands: [],
-    pose: poseResults.landmarks?.[0] ?? null,
-    mode,
-    utils: gestureUtils,
-  };
+      const gestureInput = {
+        hands: [],
+        pose: poseResults.landmarks?.[0] ?? null,
+        mode,
+        utils: gestureUtils,
+      };
 
-  const gestureResult = farGestureRecognizer.detect(gestureInput);
-  updateGestureOutput(gestureResult);
+      const gestureResult = farGestureRecognizer.detect(gestureInput);
+      updateGestureOutput(gestureResult);
 
-  nearGestureRecognizer.reset();
-}
+      nearGestureRecognizer.reset();
+    }
   }
 
   requestAnimationFrame(predictWebcam);

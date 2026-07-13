@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -21,7 +21,13 @@
     <main aria-label="Musik-Player" role="main">
       <section id="playerView">
         <label for="fileInput">MP3-Datei auswählen:</label>
-        <input class="file-input" type="file" id="fileInput" accept="audio/mpeg" multiple />
+        <input
+          class="file-input"
+          type="file"
+          id="fileInput"
+          accept="audio/mpeg"
+          multiple
+        />
 
         <h2>Sie hören:</h2>
         <div class="player-grid">
@@ -196,6 +202,11 @@
           role="status"
           aria-label="Wiedergabe-Status"
         ></div>
+
+        <div id="cameraPreview">
+          <p class="camera-label">Kamera</p>
+          <video id="webcam" autoplay playsinline muted></video>
+        </div>
 
         <audio id="audioElement"></audio>
       </section>

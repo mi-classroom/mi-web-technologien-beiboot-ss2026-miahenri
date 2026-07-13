@@ -1,5 +1,4 @@
 # Aufbau einer erweiterbaren Gesture Library
-
 * Status: accepted
 * Workload: 6h
 * Decider: [Mia Henrichsmeyer](https://github.com/miahenri)

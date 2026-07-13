@@ -50,19 +50,22 @@ export class GestureRecognizer {
       };
     }
 
-    if (detectedGesture.name === this.currentGestureCandidate) {
+    if (detectedGesture.id === this.currentGestureCandidate) {
       this.gestureFrameCount += 1;
     } else {
-      this.currentGestureCandidate = detectedGesture.name;
+      this.currentGestureCandidate = detectedGesture.id;
       this.gestureFrameCount = 1;
       this.stableGesture = null;
     }
 
+    const wasStableBefore = this.stableGesture === detectedGesture.id;
+
     if (this.gestureFrameCount >= this.requiredGestureFrames) {
-      this.stableGesture = detectedGesture.name;
+      this.stableGesture = detectedGesture.id;
     }
 
-    const isStable = Boolean(this.stableGesture);
+    const isStable = this.stableGesture === detectedGesture.id;
+    const justBecameStable = isStable && !wasStableBefore;
 
     return {
       status: isStable ? "stable" : "checking",
@@ -72,6 +75,7 @@ export class GestureRecognizer {
       gesture: {
         ...detectedGesture,
         stable: isStable,
+        justBecameStable,
         frames: this.gestureFrameCount,
       },
     };

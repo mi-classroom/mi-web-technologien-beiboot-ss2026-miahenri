@@ -1,9 +1,9 @@
-import "/src/style.css";
+import "./style.css";
 
 import {
   drawHandResults,
   drawPoseResults,
-} from "/src/demo/drawing.js";
+} from "./demo/drawing.js";
 
 import {
   GestureWebcamController,

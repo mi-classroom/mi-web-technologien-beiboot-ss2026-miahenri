@@ -7,3 +7,5 @@ export {thumbsUpGesture, thumbsDownGesture} from "./gestures/thumbsGestures.js";
 export {rightArmUpGesture} from "./gestures/armsUp.js";
 export {leftArmUpGesture} from "./gestures/armsUp.js";
 export {bothArmsUpGesture} from "./gestures/armsUp.js";
+
+export { GestureWebcamController } from "./browser/GestureWebcamController.js";

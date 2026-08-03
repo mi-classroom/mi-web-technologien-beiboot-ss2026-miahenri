@@ -1,3 +1,29 @@
+function isThumbExtended(handLandmarks, utils) {
+  const thumbMcp = handLandmarks[2];
+  const thumbIp = handLandmarks[3];
+  const thumbTip = handLandmarks[4];
+  const indexMcp = handLandmarks[5];
+
+  const palmSize = utils.getPalmSize(handLandmarks);
+
+  const thumbTipDistanceFromIndex =
+    utils.getDistanceInPixels(thumbTip, indexMcp);
+
+  const thumbIpDistanceFromIndex =
+    utils.getDistanceInPixels(thumbIp, indexMcp);
+
+  const thumbLength =
+    utils.getDistanceInPixels(thumbMcp, thumbTip);
+
+  const thumbTipIsFurtherOutside =
+    thumbTipDistanceFromIndex > thumbIpDistanceFromIndex + palmSize * 0.25;
+
+  const thumbLongEnough =
+    thumbLength > palmSize * 0.65;
+
+  return thumbTipIsFurtherOutside && thumbLongEnough;
+}
+
 export const thumbsUpGesture = {
   id: "thumbs-up",
   name: "Thumbs Up",
@@ -12,7 +38,7 @@ export const thumbsUpGesture = {
     const wrist = handLandmarks[0];
 
     const thumbTip = handLandmarks[4];
-    const thumbKnuckle = handLandmarks[3];
+    const thumbMcp = handLandmarks[2];
 
     const indexTip = handLandmarks[8];
     const middleTip = handLandmarks[12];
@@ -21,22 +47,21 @@ export const thumbsUpGesture = {
 
     const palmSize = input.utils.getPalmSize(handLandmarks);
 
-    const thumbPointsUp = thumbTip.y < thumbKnuckle.y - 0.05;
+    const thumbExtended = isThumbExtended(handLandmarks, input.utils);
 
-    const otherFingersCloseToPalm = [
-      indexTip,
-      middleTip,
-      ringTip,
-      pinkyTip,
-    ].every((tip) => {
-      const distance = input.utils.getDistanceInPixels(wrist, tip);
-      return distance < palmSize * 2;
-    });
+    const thumbPointsUp =
+      thumbTip.y < thumbMcp.y - 0.05;
 
-    if (thumbPointsUp && otherFingersCloseToPalm) {
+    const otherFingersFolded =
+      input.utils.getDistanceInPixels(wrist, indexTip) < palmSize * 2.1 &&
+      input.utils.getDistanceInPixels(wrist, middleTip) < palmSize * 2.1 &&
+      input.utils.getDistanceInPixels(wrist, ringTip) < palmSize * 2.1 &&
+      input.utils.getDistanceInPixels(wrist, pinkyTip) < palmSize * 2.1;
+
+    if (thumbExtended && thumbPointsUp && otherFingersFolded) {
       return {
         isActive: true,
-        details: "Daumen zeigt nach oben, andere Finger sind eingeklappt",
+        details: "Daumen ist ausgestreckt und zeigt nach oben",
       };
     }
 

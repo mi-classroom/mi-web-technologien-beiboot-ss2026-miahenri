@@ -62,7 +62,7 @@ src/
 
 ## Deployment
 Das Projekt ist über Github Pages deployt und läuft [hier](https://mi-classroom.github.io/mi-web-technologien-beiboot-ss2026-miahenri/).
-Die Musikplayer Anwendung kann [hier](https://mi-classroom.github.io/mi-web-technologien-beiboot-ss2026-miahenri/src/example/src/player.html) getestet werden.
+Die Musikplayer Anwendung kann [hier](https://mi-classroom.github.io/mi-web-technologien-beiboot-ss2026-miahenri/player.html) getestet werden.
 
 ## Projekt lokal ausführen
 

@@ -19,8 +19,6 @@ let queue = [];
 let currentIndex = 0;
 
 let startCamera;
-let getInteractionMode;
-let predictWebcam;
 
 const playerState = {
   playing: false,
@@ -79,7 +77,6 @@ document.getElementById("backToPlayerBtn").addEventListener("click", () => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   const fileName = localStorage.getItem("milo-file-name");
-  const fileType = localStorage.getItem("milo-file-type");
   const savedTime = localStorage.getItem("milo-current-time");
 
   if (fileName && savedTime) {
